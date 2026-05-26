@@ -50,9 +50,9 @@ Settings → Pages → Source: `Deploy from a branch` → Branch: `main` → Sav
 在 Notion 页面输入 `/embed`，粘贴对应页面的 URL：
 
 ```
-https://你的用户名.github.io/408-notes/red-black-tree.html
-https://你的用户名.github.io/408-notes/direct-insertion-sort.html
-https://你的用户名.github.io/408-notes/binary-insertion-sort.html
+https://rad-clouds.github.io/red-black-tree.html
+https://rad-clouds.github.io/direct-insertion-sort.html
+https://rad-clouds.github.io/binary-insertion-sort.html
 ```
 
 ## ✏️ 添加新知识点
