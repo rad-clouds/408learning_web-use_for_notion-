@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>408 考研动态笔记</title>
+<style>
+:root {
+  --bg:#fafbfc;--card:#fff;--text:#24292e;--text2:#586069;
+  --border:#e1e4e8;--radius:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;
+  padding:40px 24px;max-width:800px;margin:0 auto;
+}
+h1{font-size:1.8rem;text-align:center;margin-bottom:8px;
+  background:linear-gradient(135deg,#0366d6,#6f42c1,#d73a49);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.subtitle{text-align:center;color:var(--text2);margin-bottom:36px;}
+
+.subject-section{margin-bottom:32px;}
+.subject-section h2{
+  font-size:1.2rem;padding:12px 16px;border-radius:var(--radius);
+  margin-bottom:12px;color:#fff;
+}
+.subject-section h2.ds{background:linear-gradient(135deg,#0366d6,#2188ff);}
+.subject-section h2.co{background:linear-gradient(135deg,#6f42c1,#8b5cf6);}
+.subject-section h2.os{background:linear-gradient(135deg,#e36209,#f66a0a);}
+.subject-section h2.cn{background:linear-gradient(135deg,#28a745,#34d058);}
+
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.topic-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  text-decoration:none;color:var(--text);
+  transition:all 0.2s;display:block;
+}
+.topic-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  border-color:#0366d6;
+}
+.topic-card .emoji{font-size:1.5rem;margin-bottom:6px;}
+.topic-card .title{font-weight:700;margin-bottom:4px;}
+.topic-card .desc{font-size:0.82rem;color:var(--text2);}
+.topic-card .badge{
+  display:inline-block;padding:1px 8px;border-radius:10px;
+  font-size:0.7rem;font-weight:600;margin-top:8px;
+}
+.badge.done{background:#e6ffed;color:#28a745;}
+.badge.wip{background:#fffbe6;color:#b08800;}
+
+.coming-soon{opacity:0.5;pointer-events:none;}
+
+.footer{text-align:center;color:var(--text2);font-size:0.82rem;margin-top:40px;padding-top:20px;border-top:1px solid var(--border);}
+.footer a{color:#0366d6;}
+</style>
+</head>
+<body>
+<h1>📚 408 考研动态笔记</h1>
+<p class="subtitle">交互式知识点可视化 | 嵌入 Notion 使用 | 持续更新中</p>
+
+<div class="subject-section">
+  <h2 class="ds">📐 数据结构（45分）</h2>
+  <div class="topic-grid">
+
+    <a class="topic-card" href="red-black-tree.html">
+      <div class="emoji">🌳</div>
+      <div class="title">红黑树</div>
+      <div class="desc">插入操作、三种修复情况、旋转与变色</div>
+      <span class="badge done">✅ 已完成</span>
+    </a>
+
+    <a class="topic-card" href="direct-insertion-sort.html">
+      <div class="emoji">📌</div>
+      <div class="title">直接插入排序</div>
+      <div class="desc">逐元素插入、动画对比、复杂度分析</div>
+      <span class="badge done">✅ 已完成</span>
+    </a>
+
+    <a class="topic-card" href="binary-insertion-sort.html">
+      <div class="emoji">🔍</div>
+      <div class="title">折半插入排序</div>
+      <div class="desc">二分查找优化插入位置、比较次数O(nlogn)</div>
+      <span class="badge done">✅ 已完成</span>
+    </a>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">🔄</div>
+      <div class="title">希尔排序</div>
+      <div class="desc">缩小增量排序、不同增量序列对比</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">🌪️</div>
+      <div class="title">快速排序</div>
+      <div class="desc">划分过程、pivot选择策略、递归树</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">🏔️</div>
+      <div class="title">堆排序</div>
+      <div class="desc">建堆过程、堆调整、大/小根堆</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">🌲</div>
+      <div class="title">AVL 树</div>
+      <div class="desc">平衡因子、四种旋转（LL/RR/LR/RL）</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">🔗</div>
+      <div class="title">B树 / B+树</div>
+      <div class="desc">多路查找树、分裂与合并</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">📊</div>
+      <div class="title">图遍历 (DFS/BFS)</div>
+      <div class="desc">深度优先、广度优先、连通分量</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+    <div class="topic-card coming-soon">
+      <div class="emoji">🛤️</div>
+      <div class="title">最短路径</div>
+      <div class="desc">Dijkstra、Floyd算法动画</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="subject-section">
+  <h2 class="co">💻 计算机组成原理（45分）</h2>
+  <div class="topic-grid">
+    <div class="topic-card coming-soon">
+      <div class="emoji">🔢</div>
+      <div class="title">数据表示</div>
+      <div class="desc">IEEE 754、补码运算、浮点数</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+    <div class="topic-card coming-soon">
+      <div class="emoji">💾</div>
+      <div class="title">Cache 映射</div>
+      <div class="desc">直接映射、组相联、替换算法</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+    <div class="topic-card coming-soon">
+      <div class="emoji">📟</div>
+      <div class="title">指令流水线</div>
+      <div class="desc">五级流水、数据冒险、转发</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+  </div>
+</div>
+
+<div class="subject-section">
+  <h2 class="os">🖥️ 操作系统（35分）</h2>
+  <div class="topic-grid">
+    <div class="topic-card coming-soon">
+      <div class="emoji">🏃</div>
+      <div class="title">进程调度</div>
+      <div class="desc">FCFS/SJF/优先级/时间片轮转</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+    <div class="topic-card coming-soon">
+      <div class="emoji">🔒</div>
+      <div class="title">死锁</div>
+      <div class="desc">银行家算法、资源分配图</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+    <div class="topic-card coming-soon">
+      <div class="emoji">📄</div>
+      <div class="title">页面置换</div>
+      <div class="desc">FIFO/LRU/CLOCK/改进CLOCK</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+  </div>
+</div>
+
+<div class="subject-section">
+  <h2 class="cn">🌐 计算机网络（25分）</h2>
+  <div class="topic-grid">
+    <div class="topic-card coming-soon">
+      <div class="emoji">🤝</div>
+      <div class="title">TCP 三次握手</div>
+      <div class="desc">状态转换、SYN/ACK、序列号</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+    <div class="topic-card coming-soon">
+      <div class="emoji">📡</div>
+      <div class="title">路由算法</div>
+      <div class="desc">RIP/OSPF、距离向量/链路状态</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+    <div class="topic-card coming-soon">
+      <div class="emoji">🏠</div>
+      <div class="title">子网划分</div>
+      <div class="desc">CIDR、子网掩码计算</div>
+      <span class="badge wip">⏳ 计划中</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>基于 GitHub Pages 部署 | <a href="template.html">📄 模板文件</a> | 每个页面对应一个 408 知识点</p>
+  <p style="margin-top:4px;">在 Notion 中使用 <code>/embed</code> 嵌入各页面</p>
+</div>
+</body>
+</html>

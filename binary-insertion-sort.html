@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>折半插入排序 - 408数据结构</title>
+<style>
+:root {
+  --bg:#fafbfc;--card:#fff;--text:#24292e;--text2:#586069;
+  --border:#e1e4e8;--accent:#6f42c1;--accent-light:#f5f0ff;
+  --red:#d73a49;--green:#28a745;--yellow:#f9c513;--purple:#6f42c1;
+  --radius:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.7;
+  padding:24px;max-width:960px;margin:0 auto;
+}
+.page-header{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden;
+}
+.page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--purple),#e83e8c);}
+.page-header h1{font-size:1.5rem;margin-bottom:6px;margin-top:4px;}
+.page-header .sub{color:var(--text2);font-size:0.9rem;}
+.tags{margin-top:10px;}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;margin:2px 4px;background:var(--accent-light);color:var(--accent);border:1px solid #6f42c140;}
+
+.controls{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.controls button{padding:7px 14px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);cursor:pointer;font-size:0.85rem;font-family:inherit;transition:all 0.15s;white-space:nowrap;}
+.controls button:hover{background:var(--accent-light);border-color:var(--accent);}
+.controls button.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.controls button.primary:hover{opacity:0.9;}
+.controls input[type=range]{width:90px;accent-color:var(--accent);}
+.controls label{font-size:0.82rem;color:var(--text2);white-space:nowrap;}
+.controls .spacer{flex:1;}
+
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;}
+.info-card .value{font-size:1.4rem;font-weight:700;color:var(--accent);}
+.info-card .label{font-size:0.75rem;color:var(--text2);margin-top:2px;}
+
+.viz-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;}
+.viz-area canvas{max-width:100%;}
+
+/* 二分查找可视化区域 */
+.binary-search-viz{
+  margin-top:8px;display:flex;align-items:center;gap:8px;
+  font-size:0.85rem;flex-wrap:wrap;justify-content:center;
+  padding:8px 12px;background:var(--bg);border-radius:var(--radius);
+  border:1px solid var(--border);min-width:300px;
+}
+.binary-search-viz .idx{
+  display:inline-block;padding:4px 8px;border-radius:4px;
+  border:1px solid #ddd;background:#fff;font-family:'Fira Code',monospace;
+  font-size:0.8rem;min-width:28px;text-align:center;
+}
+.binary-search-viz .idx.low{border-color:var(--green);background:#e6ffed;color:var(--green);}
+.binary-search-viz .idx.mid{border-color:var(--accent);background:var(--accent-light);color:var(--accent);font-weight:700;}
+.binary-search-viz .idx.high{border-color:var(--red);background:#ffeef0;color:var(--red);}
+.binary-search-viz .arrow{color:var(--text2);}
+
+.legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;justify-content:center;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text2);}
+.legend-dot{width:12px;height:12px;border-radius:3px;}
+
+.step-log{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;
+  max-height:180px;overflow-y:auto;font-size:0.82rem;
+  font-family:'Fira Code','Cascadia Code',monospace;
+}
+.step-log .line{padding:3px 0;border-bottom:1px solid #f6f8fa;color:var(--text2);}
+.step-log .line.highlight{color:var(--text);font-weight:600;}
+.step-log .line.insert{color:var(--accent);}
+.step-log .line.binary{color:#e83e8c;}
+.step-log .empty{color:var(--gray);text-align:center;padding:20px;}
+
+.theory{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;}
+.theory h2{font-size:1.1rem;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);color:var(--accent);}
+.theory h2:first-child{margin-top:0;}
+.theory table{width:100%;border-collapse:collapse;margin:10px 0;}
+.theory th,.theory td{padding:8px 12px;text-align:left;border:1px solid var(--border);font-size:0.88rem;}
+.theory th{background:var(--bg);font-weight:700;white-space:nowrap;}
+.theory tr:hover td{background:var(--accent-light);}
+.theory ul,.theory ol{padding-left:22px;margin:8px 0;}
+.theory li{margin:4px 0;}
+.theory pre{background:#1e1e2e;color:#e0e0e0;padding:16px;border-radius:var(--radius);overflow-x:auto;font-size:0.83rem;line-height:1.6;margin:10px 0;}
+.theory code{font-family:'Fira Code','Cascadia Code',monospace;font-size:0.9em;}
+.theory p code{background:var(--bg);padding:1px 5px;border-radius:3px;font-size:0.88em;color:var(--red);}
+.theory .highlight-box{background:var(--accent-light);border:1px solid #d1bcf9;border-left:4px solid var(--accent);padding:12px 16px;border-radius:var(--radius);margin:12px 0;font-size:0.9rem;}
+.theory .highlight-box.warn{background:#fffbe6;border-color:#ffe58f;border-left-color:var(--yellow);}
+
+@media(max-width:640px){body{padding:10px;}.controls{gap:6px;}.controls button{padding:6px 10px;font-size:0.78rem;}.theory{padding:16px;}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📌 折半插入排序</h1>
+  <p class="sub">Binary Insertion Sort — 用二分查找优化插入位置的插入排序</p>
+  <div class="tags">
+    <span class="tag">数据结构</span><span class="tag">排序</span><span class="tag">内部排序</span><span class="tag">稳定</span>
+    <span class="tag">二分查找</span><span class="tag">408高频</span>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="primary" id="btnPlay" onclick="play()">▶ 播放</button>
+  <button id="btnPause" onclick="pause()">⏸ 暂停</button>
+  <button onclick="step()">⏭ 单步</button>
+  <button onclick="stepBack()">⏮ 后退</button>
+  <button onclick="reset()">↺ 重置</button>
+  <button onclick="randomize()">🎲 随机</button>
+  <span class="spacer"></span>
+  <label>🐢 慢</label>
+  <input type="range" id="speed" min="1" max="10" value="5" oninput="updateSpeed()">
+  <label>快 🐇</label>
+  <label>大小:</label>
+  <select id="arrSize" onchange="randomize()">
+    <option value="6">6</option><option value="8">8</option>
+    <option value="10" selected>10</option><option value="12">12</option>
+  </select>
+  <span id="stepCounter" style="font-size:0.82rem;color:var(--text2);">就绪</span>
+</div>
+
+<div class="info-grid">
+  <div class="info-card"><div class="value" id="stat-compare">0</div><div class="label">比较次数</div></div>
+  <div class="info-card"><div class="value" id="stat-move">0</div><div class="label">移动次数</div></div>
+  <div class="info-card"><div class="value" id="stat-size">10</div><div class="label">数组大小</div></div>
+  <div class="info-card"><div class="value" id="stat-sorted">0</div><div class="label">已排序</div></div>
+</div>
+
+<div class="viz-area">
+  <canvas id="canvas"></canvas>
+  <!-- 二分查找可视化 -->
+  <div class="binary-search-viz" id="bsViz">
+    <span style="color:var(--text2);">二分查找区间：</span>
+    <span class="idx low" id="bsLow">L=?</span>
+    <span class="arrow">…</span>
+    <span class="idx mid" id="bsMid">M=?</span>
+    <span class="arrow">…</span>
+    <span class="idx high" id="bsHigh">H=?</span>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#0366d6;"></div>未排序</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#28a745;"></div>已排序</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green);opacity:0.3;"></div>二分查找 L~H</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--purple);"></div>mid 位置</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d73a49;"></div>待插入/后移</div>
+  </div>
+</div>
+
+<div class="step-log" id="stepLog">
+  <div class="empty">👆 点击「播放」或「单步」开始 — 观察二分查找如何定位插入位置</div>
+</div>
+
+<div class="theory">
+  <h2>💡 算法思想</h2>
+  <p>在直接插入排序的基础上，用<strong>二分查找</strong>代替顺序查找来定位插入位置。<br>
+  因为<strong>前半部分已经有序</strong>，所以可以用二分查找在 O(logn) 时间内找到插入位置。</p>
+
+  <div class="highlight-box">
+    <strong>🔑 关键区别：</strong>直接插入排序 → 顺序查找 O(n²)比较；折半插入排序 → 二分查找 O(nlogn)比较，但<strong>移动次数不变，仍为O(n²)</strong>
+  </div>
+
+  <h2>📋 算法步骤</h2>
+  <ol>
+    <li>从第 2 个元素开始</li>
+    <li>对 <code>A[0..i-1]</code> 执行<strong>二分查找</strong>，找到 <code>A[i]</code> 的插入位置 <code>pos</code></li>
+    <li>将 <code>A[pos..i-1]</code> 全部后移一位</li>
+    <li>将 <code>A[i]</code> 放入 <code>A[pos]</code></li>
+  </ol>
+
+  <div class="highlight-box warn">
+    <strong>⚠️ 注意：</strong>二分查找时，当 <code>A[mid] == key</code>，为了保证<strong>稳定性</strong>，应继续在右半部分查找（让相等元素保持原顺序）。即：<code>if (A[mid] ≤ key) low = mid + 1</code>
+  </div>
+
+  <h2>📊 复杂度分析</h2>
+  <table>
+    <tr><th>指标</th><th>折半插入排序</th><th>直接插入排序</th><th>对比</th></tr>
+    <tr><td>比较次数（最好）</td><td>O(nlogn)</td><td>O(n)</td><td style="color:var(--red);">⚠ 折半更多</td></tr>
+    <tr><td>比较次数（平均）</td><td style="color:var(--green);">O(nlogn)</td><td>O(n²)</td><td style="color:var(--green);">✅ 折半更优</td></tr>
+    <tr><td>比较次数（最坏）</td><td style="color:var(--green);">O(nlogn)</td><td>O(n²)</td><td style="color:var(--green);">✅ 折半更优</td></tr>
+    <tr><td>移动次数</td><td>O(n²)</td><td>O(n²)</td><td>— 相同</td></tr>
+    <tr><td>时间复杂度</td><td>O(n²)</td><td>O(n²)</td><td>— 同量级</td></tr>
+    <tr><td>空间复杂度</td><td style="color:var(--green);">O(1)</td><td>O(1)</td><td>— 相同</td></tr>
+    <tr><td>稳定性</td><td style="color:var(--green);">稳定 ✅</td><td>稳定 ✅</td><td>— 相同</td></tr>
+  </table>
+
+  <h2>💻 代码实现</h2>
+  <pre>void BinaryInsertionSort(int A[], int n) {
+    int i, j, low, high, mid, key;
+    for (i = 1; i < n; i++) {
+        key = A[i];
+        low = 0; high = i - 1;
+
+        // ★ 二分查找插入位置
+        while (low <= high) {
+            mid = (low + high) / 2;
+            if (A[mid] <= key)   // 为保证稳定性用 <=
+                low = mid + 1;   // 在右半部分继续找
+            else
+                high = mid - 1;  // 在左半部分继续找
+        }
+        // 此时 low 就是插入位置
+
+        // 元素后移
+        for (j = i - 1; j >= low; j--)
+            A[j + 1] = A[j];
+
+        // 插入
+        A[low] = key;
+    }
+}</pre>
+
+  <div class="highlight-box">
+    <strong>📝 408 常考：</strong>折半插入排序<strong>只减少了比较次数</strong>，移动次数不变。因此总时间复杂度仍为 O(n²)。但当<strong>比较代价远大于移动代价</strong>时（如记录很大），折半插入排序优势明显。
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let data = [];
+let frames = [];
+let currentFrame = -1;
+let playing = false; let timer = null; let speed = 5;
+
+const C_DEFAULT = '#0366d6';
+const C_SORTED  = '#28a745';
+const C_BSEARCH  = 'rgba(40,167,69,0.15)'; // 二分查找范围
+const C_MID     = '#6f42c1';
+const C_INSERT  = '#d73a49';
+
+const W_PX = 800, H_PX = 340, PAD_L = 40, PAD_R = 40, PAD_T = 20, PAD_B = 55, GAP = 6;
+
+function getSize() { return parseInt(document.getElementById('arrSize').value); }
+
+function randomize() {
+  pause();
+  const n = getSize();
+  const vals = new Set();
+  while (vals.size < n) vals.add(Math.floor(Math.random() * 90) + 10);
+  data = [...vals];
+  frames = [{
+    array: [...data], colors: Array(n).fill('default'), bsInfo: null,
+    info: `📦 初始数组：[${data.join(', ')}]`, stats: { compare: 0, move: 0, sorted: 1 }
+  }];
+  currentFrame = -1;
+  updateStats(0, 0, 1);
+  updateBsViz(null);
+  document.getElementById('stepCounter').textContent = '就绪';
+  document.getElementById('stepLog').innerHTML = `<div class="line">📦 生成 ${n} 个元素：[${data.join(', ')}]</div>`;
+  resize(); drawFrame(frames[0]);
+}
+
+function updateStats(cmp, mov, sorted) {
+  document.getElementById('stat-compare').textContent = cmp;
+  document.getElementById('stat-move').textContent = mov;
+  document.getElementById('stat-size').textContent = data.length;
+  document.getElementById('stat-sorted').textContent = sorted;
+}
+
+function updateBsViz(info) {
+  const el = document.getElementById('bsViz');
+  if (!info) {
+    el.innerHTML = '<span style="color:var(--text2);">二分查找区间：</span><span class="idx low">L=?</span><span class="arrow">…</span><span class="idx mid">M=?</span><span class="arrow">…</span><span class="idx high">H=?</span>';
+    return;
+  }
+  el.innerHTML = `<span style="color:var(--text2);">二分查找：</span>
+    <span class="idx low">L=${info.low}</span><span class="arrow">→</span>
+    <span class="idx mid">M=${info.mid} | A[${info.mid}]=${info.midVal}</span><span class="arrow">→</span>
+    <span class="idx high">H=${info.high}</span>
+    <span style="color:var(--text2);margin-left:8px;">| key=${info.key} ${info.decision || ''}</span>`;
+}
+
+function generateFrames() {
+  const arr = [...data];
+  const n = arr.length;
+  let cmpCount = 0, movCount = 0;
+
+  const makeColors = (arr, sortedUpTo, bsLow, bsHigh, bsMid, inserting, shifting) => {
+    const c = Array(n).fill('default');
+    for (let i = 0; i < sortedUpTo; i++) c[i] = 'sorted';
+    // 二分查找范围
+    if (bsLow >= 0 && bsHigh >= 0) {
+      for (let i = bsLow; i <= Math.min(bsHigh, sortedUpTo - 1); i++) {
+        if (c[i] === 'sorted') c[i] = 'bsrange';
+      }
+    }
+    if (bsMid >= 0) c[bsMid] = 'bsmid';
+    if (inserting >= 0) c[inserting] = 'insert';
+    if (shifting >= 0) c[shifting] = 'insert';
+    return c;
+  };
+
+  for (let i = 1; i < n; i++) {
+    const key = arr[i];
+    let low = 0, high = i - 1;
+
+    // 显示待插入元素 + 二分查找开始
+    frames.push({
+      array: [...arr],
+      colors: makeColors(arr, i, -1, -1, -1, i, -1),
+      bsInfo: null,
+      info: `🎯 第 ${i+1} 轮：key=A[${i}]=${key}，在前 ${i} 个已排序元素中二分查找插入位置 L=[0, ${i-1}]`,
+      stats: { compare: cmpCount, move: movCount, sorted: i }
+    });
+
+    // 二分查找过程
+    let round = 0;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      cmpCount++;
+      round++;
+
+      if (arr[mid] <= key) {
+        frames.push({
+          array: [...arr],
+          colors: makeColors(arr, i, low, high, mid, i, -1),
+          bsInfo: { low, high, mid, midVal: arr[mid], key, decision: '→ 去右边' },
+          info: `🔍 二分#${round}: L=${low} H=${high} mid=${mid}, A[${mid}]=${arr[mid]} ≤ ${key} → low=mid+1`,
+          stats: { compare: cmpCount, move: movCount, sorted: i }
+        });
+        low = mid + 1;
+      } else {
+        frames.push({
+          array: [...arr],
+          colors: makeColors(arr, i, low, high, mid, i, -1),
+          bsInfo: { low, high, mid, midVal: arr[mid], key, decision: '→ 去左边' },
+          info: `🔍 二分#${round}: L=${low} H=${high} mid=${mid}, A[${mid}]=${arr[mid]} > ${key} → high=mid-1`,
+          stats: { compare: cmpCount, move: movCount, sorted: i }
+        });
+        high = mid - 1;
+      }
+    }
+
+    // 找到插入位置 low
+    frames.push({
+      array: [...arr],
+      colors: makeColors(arr, i, -1, -1, Math.min(low, i-1), i, -1),
+      bsInfo: { low: Math.min(low, i), high: -1, mid: Math.min(low, i-1), midVal: low < i ? arr[low] : '—', key, decision: '✅ 找到位置' },
+      info: `✅ 二分查找完成！插入位置 A[${low}]，需将 A[${low}..${i-1}] 后移`,
+      stats: { compare: cmpCount, move: movCount, sorted: i }
+    });
+
+    // 后移元素
+    for (let j = i - 1; j >= low; j--) {
+      arr[j + 1] = arr[j];
+      movCount++;
+      frames.push({
+        array: [...arr],
+        colors: makeColors(arr, i, -1, -1, -1, -1, j + 1),
+        bsInfo: null,
+        info: `↗️ 后移 A[${j}]=${arr[j+1]} → A[${j+1}]`,
+        stats: { compare: cmpCount, move: movCount, sorted: i }
+      });
+    }
+
+    arr[low] = key;
+
+    // 插入完成
+    frames.push({
+      array: [...arr],
+      colors: makeColors(arr, i + 1, -1, -1, -1, low, -1),
+      bsInfo: { low, high: -1, mid: -1, midVal: '—', key, decision: '' },
+      info: `✅ 插入 ${key} 到 A[${low}]，前 ${i+1} 个已排序：[${arr.slice(0,i+1).join(', ')}]`,
+      stats: { compare: cmpCount, move: movCount, sorted: i + 1 }
+    });
+  }
+
+  frames.push({
+    array: [...arr],
+    colors: Array(n).fill('sorted'),
+    bsInfo: null,
+    info: `🎉 排序完成！比较 ${cmpCount} 次 (O(nlogn))，移动 ${movCount} 次 (O(n²))`,
+    stats: { compare: cmpCount, move: movCount, sorted: n }
+  });
+}
+
+function drawFrame(frame) {
+  const W = canvas.width / (window.devicePixelRatio || 1);
+  const H = canvas.height / (window.devicePixelRatio || 1);
+  ctx.clearRect(0, 0, W, H);
+
+  const arr = frame.array; const n = arr.length;
+  const maxVal = Math.max(...arr);
+  const chartW = W - PAD_L - PAD_R;
+  const barW = (chartW - GAP * (n - 1)) / n;
+
+  // Y轴网格
+  ctx.fillStyle = '#d1d5da'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+  for (let v = 0; v <= 100; v += 20) {
+    const y = PAD_T + (H - PAD_T - PAD_B) * (1 - v / maxVal);
+    ctx.fillText(v, PAD_L - 6, y + 4);
+    ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(W - PAD_R, y);
+    ctx.strokeStyle = '#f0f0f0'; ctx.stroke();
+  }
+
+  arr.forEach((v, i) => {
+    const x = PAD_L + i * (barW + GAP);
+    const h = (v / maxVal) * (H - PAD_T - PAD_B);
+    const y = PAD_T + (H - PAD_T - PAD_B) - h;
+
+    let color = C_DEFAULT;
+    switch (frame.colors[i]) {
+      case 'sorted': color = C_SORTED; break;
+      case 'bsrange': color = C_BSEARCH; break;
+      case 'bsmid': color = C_MID; break;
+      case 'insert': color = C_INSERT; break;
+    }
+
+    ctx.fillStyle = color;
+    ctx.beginPath(); roundRect(x, y, barW, h, 4); ctx.fill();
+
+    // 二分范围边框
+    if (frame.colors[i] === 'bsrange') {
+      ctx.strokeStyle = C_SORTED; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); roundRect(x, y, barW, h, 4); ctx.stroke();
+      ctx.setLineDash([]); ctx.lineWidth = 1;
+    }
+    // mid 高亮
+    if (frame.colors[i] === 'bsmid') {
+      ctx.strokeStyle = C_MID; ctx.lineWidth = 2.5;
+      ctx.beginPath(); roundRect(x - 1, y - 1, barW + 2, h + 2, 5); ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+
+    ctx.fillStyle = frame.colors[i] === 'insert' ? C_INSERT : '#24292e';
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(v, x + barW / 2, y - 6);
+
+    ctx.fillStyle = '#6a737d'; ctx.font = '10px sans-serif';
+    ctx.fillText(i, x + barW / 2, PAD_T + (H - PAD_T - PAD_B) + 16);
+  });
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+}
+
+function applyFrame(f) {
+  data = [...f.array];
+  updateStats(f.stats.compare, f.stats.move, f.stats.sorted);
+  updateBsViz(f.bsInfo);
+  drawFrame(f);
+  document.getElementById('stepCounter').textContent =
+    currentFrame >= 0 ? `${currentFrame+1}/${frames.length}` : '就绪';
+  if (f.info) addLog(f.info, f.info.includes('🔍') ? 'binary' : f.info.includes('✅') ? 'insert' : f.info.includes('🎯') ? 'highlight' : '');
+}
+
+function addLog(msg, cls) {
+  const log = document.getElementById('stepLog');
+  log.innerHTML = `<div class="line ${cls}">${msg}</div>` + log.innerHTML;
+  const lines = log.querySelectorAll('.line');
+  if (lines.length > 30) lines[lines.length - 1].remove();
+  log.scrollTop = 0;
+}
+
+function play() {
+  if (playing) return;
+  if (frames.length <= 1) generateFrames();
+  if (currentFrame >= frames.length - 1) { currentFrame = -1; }
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ 暂停';
+  runAnimation();
+}
+function pause() { playing = false; clearTimeout(timer); document.getElementById('btnPlay').textContent = '▶ 播放'; }
+function step() { pause(); if (frames.length <= 1) generateFrames(); if (currentFrame < frames.length - 1) { currentFrame++; applyFrame(frames[currentFrame]); } }
+function stepBack() { pause(); if (currentFrame > 0) { currentFrame--; applyFrame(frames[currentFrame]); } }
+function reset() { pause(); if (frames.length > 0) { currentFrame = 0; applyFrame(frames[0]); } }
+function updateSpeed() { speed = parseInt(document.getElementById('speed').value); if (playing) { clearTimeout(timer); runAnimation(); } }
+function runAnimation() {
+  if (!playing) return;
+  if (currentFrame >= frames.length - 1) { playing = false; document.getElementById('btnPlay').textContent = '▶ 播放'; return; }
+  currentFrame++; applyFrame(frames[currentFrame]);
+  timer = setTimeout(runAnimation, 1300 - speed * 110);
+}
+
+randomize(); resize();
+</script>
+</body>
+</html>

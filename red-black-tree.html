@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>红黑树 - 408数据结构</title>
+<style>
+:root {
+  --bg:#fafbfc;--card:#fff;--text:#24292e;--text2:#586069;
+  --border:#e1e4e8;--accent:#d73a49;--accent-light:#ffeef0;
+  --red:#d73a49;--green:#28a745;--black:#1b1f23;
+  --radius:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.7;
+  padding:24px;max-width:1000px;margin:0 auto;
+}
+.page-header{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden;
+}
+.page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--black),var(--red),var(--black));}
+.page-header h1{font-size:1.5rem;margin-bottom:6px;margin-top:4px;}
+.page-header .sub{color:var(--text2);font-size:0.9rem;}
+.tags{margin-top:10px;}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;margin:2px 4px;background:var(--accent-light);color:var(--accent);border:1px solid #d73a4940;}
+
+.controls{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.controls button{padding:7px 14px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);cursor:pointer;font-size:0.85rem;font-family:inherit;transition:all 0.15s;white-space:nowrap;}
+.controls button:hover{background:var(--accent-light);border-color:var(--accent);}
+.controls button.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.controls button.primary:hover{opacity:0.9;}
+.controls input[type=text]{padding:7px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;font-family:inherit;width:120px;outline:none;}
+.controls input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(215,58,73,0.1);}
+.controls label{font-size:0.82rem;color:var(--text2);}
+.controls .spacer{flex:1;}
+.controls .preset-btn{font-size:0.8rem;padding:5px 10px;}
+
+.info-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;flex:1;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;}
+.info-card .value{font-size:1.4rem;font-weight:700;color:var(--accent);}
+.info-card .label{font-size:0.75rem;color:var(--text2);margin-top:2px;}
+
+/* RBT 属性检查 */
+.rbt-props{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 18px;flex:1;min-width:260px;
+}
+.rbt-props h3{font-size:0.9rem;margin-bottom:10px;color:var(--text2);}
+.prop-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.82rem;}
+.prop-item .check{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;}
+.prop-item.pass .check{background:#e6ffed;color:var(--green);}
+.prop-item.fail .check{background:#ffeef0;color:var(--red);}
+.prop-item.unknown .check{background:#f0f0f0;color:var(--text2);}
+
+.viz-area{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:auto;min-height:300px;
+}
+.viz-area canvas{display:block;}
+
+.step-log{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;
+  max-height:200px;overflow-y:auto;font-size:0.82rem;
+  font-family:'Fira Code','Cascadia Code',monospace;
+}
+.step-log .line{padding:3px 0;border-bottom:1px solid #f6f8fa;color:var(--text2);}
+.step-log .line.ins{color:var(--accent);font-weight:600;}
+.step-log .line.rot{color:#6f42c1;}
+.step-log .line.rec{color:#e36209;}
+.step-log .line.done{color:var(--green);}
+.step-log .empty{color:#6a737d;text-align:center;padding:20px;}
+
+.theory{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;}
+.theory h2{font-size:1.1rem;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);color:var(--accent);}
+.theory h2:first-child{margin-top:0;}
+.theory table{width:100%;border-collapse:collapse;margin:10px 0;}
+.theory th,.theory td{padding:8px 12px;text-align:left;border:1px solid var(--border);font-size:0.88rem;}
+.theory th{background:var(--bg);font-weight:700;white-space:nowrap;}
+.theory tr:hover td{background:var(--accent-light);}
+.theory ul,.theory ol{padding-left:22px;margin:8px 0;}
+.theory li{margin:4px 0;}
+.theory pre{background:#1e1e2e;color:#e0e0e0;padding:16px;border-radius:var(--radius);overflow-x:auto;font-size:0.83rem;line-height:1.6;margin:10px 0;}
+.theory code{font-family:'Fira Code','Cascadia Code',monospace;font-size:0.9em;}
+.theory p code{background:var(--bg);padding:1px 5px;border-radius:3px;font-size:0.88em;color:var(--red);}
+.theory .highlight-box{background:var(--accent-light);border:1px solid #f5c6cb;border-left:4px solid var(--accent);padding:12px 16px;border-radius:var(--radius);margin:12px 0;font-size:0.9rem;}
+.theory .highlight-box.info{background:#f1f8ff;border-color:#79b8ff;border-left-color:#0366d6;}
+
+/* 插入颜色动画示例 */
+.color-demo{display:flex;gap:20px;align-items:center;margin:12px 0;flex-wrap:wrap;}
+.color-demo .node-demo{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.color-demo .circle{width:36px;height:36px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;}
+.circle.red{background:#ff6b6b;color:#fff;}
+.circle.black{background:#2d3436;color:#fff;}
+.circle.nil{background:#fff;border-style:dashed;color:#999;font-size:0.65rem;}
+
+@media(max-width:640px){body{padding:10px;}.controls{gap:6px;}.theory{padding:16px;}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🌳 红黑树</h1>
+  <p class="sub">Red-Black Tree — 自平衡二叉查找树，STL map/set 的底层实现</p>
+  <div class="tags">
+    <span class="tag">数据结构</span><span class="tag">树</span><span class="tag">平衡二叉树</span><span class="tag">查找</span>
+    <span class="tag">408高频</span><span class="tag">难点</span>
+  </div>
+</div>
+
+<div class="controls">
+  <input type="text" id="nodeValue" placeholder="输入数值，如 50" onkeydown="if(event.key==='Enter')insertNode()">
+  <button class="primary" onclick="insertNode()">➕ 插入</button>
+  <button onclick="insertRandom()">🎲 随机插入</button>
+  <button onclick="resetTree()">🔄 重置</button>
+  <span class="spacer"></span>
+  <button class="preset-btn" onclick="loadPreset('bst')">📦 预设: BST恶化</button>
+  <button class="preset-btn" onclick="loadPreset('demo')">📦 预设: 教学演示</button>
+  <button class="preset-btn" onclick="loadPreset('rot')">📦 预设: 旋转示例</button>
+</div>
+
+<div class="info-row">
+  <div class="info-grid">
+    <div class="info-card"><div class="value" id="stat-nodes">0</div><div class="label">节点总数</div></div>
+    <div class="info-card"><div class="value" id="stat-height">0</div><div class="label">树高</div></div>
+    <div class="info-card"><div class="value" id="stat-blackh">0</div><div class="label">黑高</div></div>
+    <div class="info-card"><div class="value" id="stat-ops">0</div><div class="label">操作次数</div></div>
+  </div>
+  <div class="rbt-props" id="rbtProps">
+    <h3>🔍 红黑树性质检查</h3>
+    <div class="prop-item"><span class="check">—</span> ① 根节点为黑色</div>
+    <div class="prop-item"><span class="check">—</span> ② 红色节点的子节点为黑色</div>
+    <div class="prop-item"><span class="check">—</span> ③ 每条路径黑节点数相同</div>
+    <div class="prop-item"><span class="check">—</span> ④ 叶节点 (NIL) 为黑色</div>
+  </div>
+</div>
+
+<div class="viz-area">
+  <canvas id="canvas"></canvas>
+</div>
+
+<div class="step-log" id="stepLog">
+  <div class="empty">👆 输入数值后点击「插入」，观察红黑树的插入与自平衡过程</div>
+</div>
+
+<div class="theory">
+  <h2>💡 什么是红黑树？</h2>
+  <p>红黑树是一种<strong>自平衡二叉查找树</strong>，通过对节点着色（红/黑）并用旋转来维持近似平衡。最大高度不超过 <strong>2×log₂(n+1)</strong>。</p>
+  <p>Java 的 <code>TreeMap</code>、C++ 的 <code>std::map</code>、Linux 内核的 CFS 调度器都基于红黑树。</p>
+
+  <h2>📏 五条性质（定义）</h2>
+  <ol>
+    <li>每个节点要么是<strong style="color:#d73a49;">红色</strong>🔴，要么是<strong style="color:#1b1f23;">黑色</strong>⚫</li>
+    <li><strong>根节点</strong>必为黑色</li>
+    <li>每个叶节点 (NIL) 是黑色</li>
+    <li><strong style="color:#d73a49;">红色节点</strong>的两个子节点必须都是黑色（即不存在两个连续红色）</li>
+    <li>从任一节点到其每个叶子的路径上，<strong>黑色节点数量相同</strong>（黑高相同）</li>
+  </ol>
+
+  <div class="color-demo">
+    <div class="node-demo"><div class="circle red">5</div><span>红节点</span></div>
+    <div class="node-demo"><div class="circle black">8</div><span>黑节点</span></div>
+    <div class="node-demo"><div class="circle nil">NIL</div><span>叶节点(黑)</span></div>
+  </div>
+
+  <h2>🔄 插入修复的三种情况</h2>
+  <p>插入新节点时默认为<strong style="color:#d73a49;">红色</strong>，然后检查并修复违反性质的情况：</p>
+
+  <table>
+    <tr><th>情况</th><th>叔节点颜色</th><th>当前节点位置</th><th>修复操作</th></tr>
+    <tr>
+      <td><strong>Case 1</strong></td>
+      <td style="color:#d73a49;">红色 🔴</td>
+      <td>任意</td>
+      <td>父、叔变黑，祖父变红，<strong>向上递归</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Case 2</strong></td>
+      <td>黑色 ⚫</td>
+      <td>LR 或 RL（折线）</td>
+      <td><strong>旋转父节点</strong>，转为 Case 3</td>
+    </tr>
+    <tr>
+      <td><strong>Case 3</strong></td>
+      <td>黑色 ⚫</td>
+      <td>LL 或 RR（直线）</td>
+      <td><strong>旋转祖父节点</strong> + 变色，完成</td>
+    </tr>
+  </table>
+
+  <div class="highlight-box">
+    <strong>🔑 记忆口诀：</strong>「叔红就变色，叔黑看形状；折线转直线，直线旋转完」
+  </div>
+
+  <h2>📊 复杂度分析</h2>
+  <table>
+    <tr><th>操作</th><th>时间复杂度</th><th>说明</th></tr>
+    <tr><td>查找</td><td style="color:var(--green);font-weight:700;">O(log n)</td><td>BST 搜索 + 树高 ≤ 2log₂(n+1)</td></tr>
+    <tr><td>插入</td><td style="color:var(--green);font-weight:700;">O(log n)</td><td>最多 2 次旋转 + O(log n) 次变色</td></tr>
+    <tr><td>删除</td><td style="color:var(--green);font-weight:700;">O(log n)</td><td>最多 3 次旋转</td></tr>
+    <tr><td>与 AVL 对比</td><td colspan="2">红黑树插入删除只需 O(1) 次旋转，AVL 需要 O(logn) 次 → 红黑树更适合<strong>写多读少</strong>的场景</td></tr>
+  </table>
+
+  <h2>💻 插入修复代码（核心）</h2>
+  <pre>void RB_Insert_Fixup(T, z) {
+    while (z.parent.color == RED) {
+        if (z.parent == z.grandparent.left) {
+            y = z.grandparent.right;        // 叔节点
+            if (y.color == RED) {           // ★ Case 1: 叔红
+                z.parent.color = BLACK;
+                y.color = BLACK;
+                z.grandparent.color = RED;
+                z = z.grandparent;          // 向上递归
+            } else {
+                if (z == z.parent.right) {  // ★ Case 2: LR
+                    z = z.parent;
+                    Left_Rotate(T, z);      // 转为 LL
+                }
+                // ★ Case 3: LL
+                z.parent.color = BLACK;
+                z.grandparent.color = RED;
+                Right_Rotate(T, z.grandparent);
+            }
+        } else { /* 对称处理 */ }
+    }
+    T.root.color = BLACK;                   // 根必黑
+}</pre>
+
+  <div class="highlight-box info">
+    <strong>📝 408 常考：</strong>
+    <ul>
+      <li>n 个节点的红黑树高度 ≤ 2log₂(n+1)</li>
+      <li>插入最多 2 次旋转，删除最多 3 次旋转</li>
+      <li>黑高：从该节点到叶子的黑色节点数（不含自身）</li>
+      <li>红黑树是「近似平衡」，AVL 是「严格平衡」</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// ==================== 红黑树数据结构 ====================
+const RED = 0, BLACK = 1;
+
+class RBTNode {
+  constructor(val, color = RED) {
+    this.val = val;
+    this.color = color;
+    this.left = null;   // NIL
+    this.right = null;  // NIL
+    this.parent = null;
+  }
+}
+
+class RedBlackTree {
+  constructor() {
+    this.root = null;
+    this.nodeCount = 0;
+    this.ops = [];
+  }
+
+  // 插入值
+  insert(val) {
+    this.ops = [];
+    // BST 插入
+    let node = new RBTNode(val, RED);
+    let y = null;
+    let x = this.root;
+
+    while (x !== null) {
+      y = x;
+      if (val < x.val) x = x.left;
+      else if (val > x.val) x = x.right;
+      else {
+        this.ops.push(`⚠️ 值 ${val} 已存在，跳过`);
+        return; // 重复值跳过
+      }
+    }
+
+    node.parent = y;
+    if (y === null) {
+      this.root = node;
+    } else if (val < y.val) {
+      y.left = node;
+    } else {
+      y.right = node;
+    }
+
+    this.nodeCount++;
+    this.ops.push(`➕ 插入节点 ${val} (红色)`);
+
+    // 修复
+    this._insertFixup(node);
+    this.ops.push(`✅ 修复完成，根节点=${this.root.val}(${this.root.color===BLACK?'黑':'红'})`);
+  }
+
+  _insertFixup(z) {
+    while (z.parent !== null && z.parent.color === RED) {
+      const gp = z.parent.parent; // grandparent 必存在（因为 parent 是红色，不可能是根）
+      if (z.parent === gp.left) {
+        const uncle = gp.right;
+        if (uncle !== null && uncle.color === RED) {
+          // ★ Case 1: 叔红 → 变色
+          this.ops.push(`🔄 Case 1: 叔节点 ${uncle.val}(红) 存在 → 父亲${z.parent.val}、叔${uncle.val}变黑，祖父${gp.val}变红，向上递归`);
+          z.parent.color = BLACK;
+          uncle.color = BLACK;
+          gp.color = RED;
+          z = gp;
+        } else {
+          if (z === z.parent.right) {
+            // ★ Case 2: LR → 左旋转父
+            this.ops.push(`↩️ Case 2: LR折线 → 左旋转父节点 ${z.parent.val}`);
+            z = z.parent;
+            this._leftRotate(z);
+          }
+          // ★ Case 3: LL → 右旋转祖父 + 变色
+          this.ops.push(`↪️ Case 3: LL直线 → 父${z.parent.val}变黑、祖父${gp.val}变红，右旋转祖父`);
+          z.parent.color = BLACK;
+          gp.color = RED;
+          this._rightRotate(gp);
+        }
+      } else {
+        // 对称
+        const uncle = gp.left;
+        if (uncle !== null && uncle.color === RED) {
+          this.ops.push(`🔄 Case 1(对称): 叔节点 ${uncle.val}(红) 存在 → 变色+向上递归`);
+          z.parent.color = BLACK;
+          uncle.color = BLACK;
+          gp.color = RED;
+          z = gp;
+        } else {
+          if (z === z.parent.left) {
+            this.ops.push(`↩️ Case 2(对称): RL折线 → 右旋转父节点 ${z.parent.val}`);
+            z = z.parent;
+            this._rightRotate(z);
+          }
+          this.ops.push(`↪️ Case 3(对称): RR直线 → 变色+左旋转祖父`);
+          z.parent.color = BLACK;
+          gp.color = RED;
+          this._leftRotate(gp);
+        }
+      }
+    }
+    if (this.root.color === RED) {
+      this.ops.push(`⚫ 根节点 ${this.root.val} 强制变黑`);
+    }
+    this.root.color = BLACK;
+  }
+
+  _leftRotate(x) {
+    let y = x.right;
+    if (y === null) return;
+    x.right = y.left;
+    if (y.left !== null) y.left.parent = x;
+    y.parent = x.parent;
+    if (x.parent === null) this.root = y;
+    else if (x === x.parent.left) x.parent.left = y;
+    else x.parent.right = y;
+    y.left = x;
+    x.parent = y;
+  }
+
+  _rightRotate(y) {
+    let x = y.left;
+    if (x === null) return;
+    y.left = x.right;
+    if (x.right !== null) x.right.parent = y;
+    x.parent = y.parent;
+    if (y.parent === null) this.root = x;
+    else if (y === y.parent.right) y.parent.right = x;
+    else y.parent.left = x;
+    x.right = y;
+    y.parent = x;
+  }
+
+  // 检查 RBT 性质
+  checkProperties() {
+    const result = { rootBlack: false, noConsecRed: true, sameBlackH: true, blackH: -1 };
+    if (!this.root) return { ...result, rootBlack: true, sameBlackH: true, blackH: 0 };
+
+    result.rootBlack = this.root.color === BLACK;
+
+    const checkNode = (node) => {
+      if (!node) return 1; // NIL 是黑色
+
+      // 检查红色节点的孩子
+      if (node.color === RED) {
+        if ((node.left && node.left.color === RED) ||
+            (node.right && node.right.color === RED)) {
+          result.noConsecRed = false;
+        }
+      }
+
+      let leftBH = checkNode(node.left);
+      let rightBH = checkNode(node.right);
+
+      if (leftBH !== rightBH) result.sameBlackH = false;
+      if (result.blackH === -1) result.blackH = leftBH;
+
+      return leftBH + (node.color === BLACK ? 1 : 0);
+    };
+
+    checkNode(this.root);
+    return result;
+  }
+
+  // 计算高度
+  height() {
+    const h = (node) => {
+      if (!node) return 0;
+      return 1 + Math.max(h(node.left), h(node.right));
+    };
+    return h(this.root);
+  }
+
+  clear() {
+    this.root = null;
+    this.nodeCount = 0;
+    this.ops = [];
+  }
+}
+
+// ==================== 全局状态 ====================
+let rbt = new RedBlackTree();
+let opLog = []; // 累计操作日志
+
+// ==================== 可视化绘制 ====================
+function drawTree() {
+  const dpr = window.devicePixelRatio || 1;
+  const container = canvas.parentElement;
+  const cw = Math.min(container.clientWidth - 16, 900);
+  const ch = Math.max(400, rbt.height() * 70 + 80);
+
+  canvas.width = cw * dpr;
+  canvas.height = ch * dpr;
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+
+  ctx.fillStyle = '#fafbfc';
+  ctx.fillRect(0, 0, cw, ch);
+
+  if (!rbt.root) {
+    ctx.fillStyle = '#d1d5da';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('（空树）', cw / 2, ch / 2);
+    return;
+  }
+
+  // 计算节点位置（中序遍历分配 x 坐标）
+  const positions = new Map();
+  let xCounter = 0;
+  const NODE_R = 22;
+  const LEVEL_H = 65;
+  const TOP_PAD = 50;
+
+  function assignX(node) {
+    if (!node) return;
+    assignX(node.left);
+    positions.set(node, { x: 0, y: 0, index: xCounter++ });
+    assignX(node.right);
+  }
+  assignX(rbt.root);
+
+  // 计算 y 坐标（BFS）
+  const queue = [{ node: rbt.root, depth: 0 }];
+  while (queue.length > 0) {
+    const { node, depth } = queue.shift();
+    const pos = positions.get(node);
+    pos.y = TOP_PAD + depth * LEVEL_H;
+    if (node.left) queue.push({ node: node.left, depth: depth + 1 });
+    if (node.right) queue.push({ node: node.right, depth: depth + 1 });
+  }
+
+  // 计算节点在 canvas 上的实际像素位置
+  const totalNodes = rbt.nodeCount;
+  const usableW = cw - 60;
+  const spacing = totalNodes > 1 ? usableW / (totalNodes - 1) : usableW;
+  const offsetX = totalNodes > 1 ? 30 : cw / 2 - spacing / 2;
+
+  const getX = (node) => offsetX + positions.get(node).index * spacing;
+  const getY = (node) => positions.get(node).y;
+
+  // 先画边
+  const drawEdges = (node) => {
+    if (!node) return;
+    const px = getX(node), py = getY(node);
+    if (node.left) {
+      const cx = getX(node.left), cy = getY(node.left);
+      ctx.beginPath();
+      ctx.moveTo(px, py + NODE_R);
+      ctx.lineTo(cx, cy - NODE_R);
+      ctx.strokeStyle = '#c0c0c0'; ctx.lineWidth = 1.5;
+      ctx.stroke();
+      drawEdges(node.left);
+    }
+    if (node.right) {
+      const cx = getX(node.right), cy = getY(node.right);
+      ctx.beginPath();
+      ctx.moveTo(px, py + NODE_R);
+      ctx.lineTo(cx, cy - NODE_R);
+      ctx.strokeStyle = '#c0c0c0'; ctx.lineWidth = 1.5;
+      ctx.stroke();
+      drawEdges(node.right);
+    }
+  };
+  drawEdges(rbt.root);
+
+  // 再画节点
+  const drawNodes = (node) => {
+    if (!node) return;
+    const x = getX(node), y = getY(node);
+
+    // 阴影
+    ctx.beginPath();
+    ctx.arc(x + 1, y + 2, NODE_R, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fill();
+
+    // 节点圆
+    ctx.beginPath();
+    ctx.arc(x, y, NODE_R, 0, Math.PI * 2);
+    ctx.fillStyle = node.color === RED ? '#ff6b6b' : '#2d3436';
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 值
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(node.val, x, y);
+
+    drawNodes(node.left);
+    drawNodes(node.right);
+  };
+  drawNodes(rbt.root);
+}
+
+// ==================== UI 更新 ====================
+function updateUI() {
+  document.getElementById('stat-nodes').textContent = rbt.nodeCount;
+  document.getElementById('stat-height').textContent = rbt.height();
+  const props = rbt.checkProperties();
+  document.getElementById('stat-blackh').textContent = props.blackH;
+  document.getElementById('stat-ops').textContent = opLog.length;
+
+  // 更新性质检查
+  const propDivs = document.getElementById('rbtProps').querySelectorAll('.prop-item');
+  const checks = [
+    props.rootBlack,
+    props.noConsecRed,
+    props.sameBlackH,
+    true // NIL 总是黑色
+  ];
+  const labels = [
+    '① 根节点为黑色',
+    '② 红色节点的子节点为黑色',
+    '③ 每条路径黑节点数相同',
+    '④ 叶节点 (NIL) 为黑色'
+  ];
+  propDivs.forEach((div, i) => {
+    div.className = `prop-item ${checks[i] ? 'pass' : 'fail'}`;
+    div.innerHTML = `<span class="check">${checks[i] ? '✓' : '✗'}</span> ${labels[i]}`;
+  });
+
+  drawTree();
+}
+
+function addOps(ops) {
+  opLog.push(...ops);
+  const logEl = document.getElementById('stepLog');
+  ops.forEach(op => {
+    let cls = '';
+    if (op.includes('插入')) cls = 'ins';
+    else if (op.includes('旋转')) cls = 'rot';
+    else if (op.includes('Case')) cls = 'rec';
+    else if (op.includes('完成')) cls = 'done';
+    logEl.innerHTML = `<div class="line ${cls}">${op}</div>` + logEl.innerHTML;
+  });
+  // 保留最近 50 条
+  const lines = logEl.querySelectorAll('.line');
+  if (lines.length > 50) {
+    for (let i = 50; i < lines.length; i++) lines[i].remove();
+  }
+  logEl.scrollTop = 0;
+}
+
+// ==================== 操作 ====================
+function insertNode() {
+  const input = document.getElementById('nodeValue');
+  const val = parseInt(input.value);
+  if (isNaN(val)) { alert('请输入有效数字'); return; }
+  if (val < 1 || val > 999) { alert('请输入 1-999 之间的数字'); return; }
+
+  rbt.insert(val);
+  addOps(rbt.ops);
+  updateUI();
+  input.value = '';
+  input.focus();
+}
+
+function insertRandom() {
+  // 生成一个不在树中的随机数
+  const allVals = new Set();
+  const collect = (node) => {
+    if (!node) return;
+    allVals.add(node.val);
+    collect(node.left); collect(node.right);
+  };
+  collect(rbt.root);
+
+  let val;
+  do { val = Math.floor(Math.random() * 200) + 1; } while (allVals.has(val));
+  document.getElementById('nodeValue').value = val;
+  insertNode();
+}
+
+function resetTree() {
+  rbt.clear();
+  opLog = [];
+  document.getElementById('stepLog').innerHTML = '<div class="empty">🔄 树已重置，输入数值开始插入</div>';
+  updateUI();
+  document.getElementById('nodeValue').value = '';
+}
+
+function loadPreset(type) {
+  resetTree();
+  let vals;
+  if (type === 'bst') {
+    // 升序插入会触发很多修复（最坏情况演示）
+    vals = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+  } else if (type === 'demo') {
+    // 插入顺序展示三种 case
+    vals = [50, 30, 70, 20, 60, 80, 10];
+  } else if (type === 'rot') {
+    // 展示旋转的场景
+    vals = [30, 20, 10, 40, 50, 60];
+  }
+
+  // 逐步插入，带延迟展示
+  let i = 0;
+  function insertNext() {
+    if (i >= vals.length) return;
+    rbt.insert(vals[i]);
+    addOps(rbt.ops);
+    updateUI();
+    i++;
+    if (i < vals.length) setTimeout(insertNext, 800);
+  }
+  insertNext();
+}
+
+// ==================== 响应式 ====================
+window.addEventListener('resize', drawTree);
+
+// 初始化
+updateUI();
+document.getElementById('nodeValue').focus();
+</script>
+</body>
+</html>

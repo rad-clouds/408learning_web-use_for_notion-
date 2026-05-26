@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模板 - 知识点名称</title>
+<style>
+:root {
+  --bg: #fafbfc; --card: #fff; --text: #24292e; --text2: #586069;
+  --border: #e1e4e8; --accent: #0366d6; --accent-light: #f1f8ff;
+  --red: #d73a49; --green: #28a745; --yellow: #ffd33d;
+  --radius: 8px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;
+  padding:24px;max-width:960px;margin:0 auto;
+}
+
+/* 页面头部 */
+.page-header{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;margin-bottom:20px;
+}
+.page-header h1{font-size:1.5rem;margin-bottom:8px;}
+.page-header .tags{margin-top:8px;}
+.tag{
+  display:inline-block;padding:2px 10px;border-radius:12px;
+  font-size:0.78rem;font-weight:600;margin:2px 4px;
+  background:var(--accent-light);color:var(--accent);border:1px solid #0366d640;
+}
+
+/* 控制栏 */
+.controls{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.controls button{
+  padding:8px 16px;border:1px solid var(--border);border-radius:6px;
+  background:var(--card);color:var(--text);cursor:pointer;
+  font-size:0.88rem;font-family:inherit;transition:all 0.15s;
+}
+.controls button:hover{background:var(--accent-light);border-color:var(--accent);}
+.controls button.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.controls button.primary:hover{opacity:0.9;}
+.controls input[type=range]{width:100px;}
+.controls label{font-size:0.85rem;color:var(--text2);}
+
+/* 可视化区域 */
+.viz-area{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  min-height:300px;display:flex;align-items:center;justify-content:center;
+}
+
+/* 信息卡片 */
+.info-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.info-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;text-align:center;
+}
+.info-card .value{font-size:1.5rem;font-weight:700;color:var(--accent);}
+.info-card .label{font-size:0.78rem;color:var(--text2);margin-top:2px;}
+
+/* 理论区 */
+.theory{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;
+}
+.theory h2{font-size:1.15rem;margin:16px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.theory h2:first-child{margin-top:0;}
+.theory table{width:100%;border-collapse:collapse;margin:12px 0;}
+.theory th,.theory td{padding:8px 12px;text-align:left;border:1px solid var(--border);font-size:0.9rem;}
+.theory th{background:var(--bg);font-weight:700;}
+.theory ul,.theory ol{padding-left:20px;margin:8px 0;}
+.theory li{margin:4px 0;}
+.theory pre{
+  background:#1e1e2e;color:#e0e0e0;padding:16px;border-radius:var(--radius);
+  overflow-x:auto;font-size:0.85rem;line-height:1.5;margin:12px 0;
+}
+.theory code{font-family:'Fira Code','Cascadia Code',monospace;font-size:0.9em;}
+.theory p code{background:var(--bg);padding:1px 5px;border-radius:3px;font-size:0.88em;color:var(--red);}
+
+/* 步骤日志 */
+.step-log{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;margin-top:20px;
+  max-height:200px;overflow-y:auto;font-size:0.85rem;
+  font-family:'Fira Code',monospace;
+}
+.step-log .line{padding:2px 0;border-bottom:1px solid #f0f0f0;}
+.step-log .line:last-child{border-bottom:none;}
+
+@media(max-width:640px){
+  body{padding:12px;}
+  .controls{gap:8px;}
+  .controls button{padding:6px 12px;font-size:0.8rem;}
+}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>📘 知识点名称</h1>
+  <p style="color:var(--text2);">数据结构的核心排序算法之一</p>
+  <div class="tags"><span class="tag">数据结构</span><span class="tag">排序</span></div>
+</div>
+
+<div class="controls">
+  <button class="primary" onclick="play()">▶ 播放</button>
+  <button onclick="pause()">⏸ 暂停</button>
+  <button onclick="step()">⏭ 单步</button>
+  <button onclick="reset()">↺ 重置</button>
+  <button onclick="randomize()">🎲 随机</button>
+  <label>速度</label>
+  <input type="range" id="speed" min="1" max="10" value="5" oninput="updateSpeed()">
+  <span id="stepCounter" style="font-size:0.85rem;color:var(--text2);margin-left:auto;">0/0</span>
+</div>
+
+<div class="info-grid" id="stats">
+  <div class="info-card"><div class="value" id="stat-compare">0</div><div class="label">比较次数</div></div>
+  <div class="info-card"><div class="value" id="stat-swap">0</div><div class="label">移动次数</div></div>
+  <div class="info-card"><div class="value" id="stat-size">10</div><div class="label">数组大小</div></div>
+</div>
+
+<div class="viz-area">
+  <canvas id="canvas" style="width:100%;max-width:800px;"></canvas>
+</div>
+
+<div class="step-log" id="stepLog">
+  <div class="line" style="color:var(--text2);">点击"播放"开始...</div>
+</div>
+
+<div class="theory">
+  <!-- 知识内容 -->
+  <h2>1. 算法思想</h2>
+  <p>在这里描述算法的核心思想...</p>
+
+  <h2>2. 算法步骤</h2>
+  <ol>
+    <li>步骤一</li>
+    <li>步骤二</li>
+  </ol>
+
+  <h2>3. 复杂度分析</h2>
+  <table>
+    <tr><th>指标</th><th>值</th></tr>
+    <tr><td>时间复杂度（最好）</td><td>O(n)</td></tr>
+    <tr><td>时间复杂度（平均）</td><td>O(n²)</td></tr>
+    <tr><td>时间复杂度（最坏）</td><td>O(n²)</td></tr>
+    <tr><td>空间复杂度</td><td>O(1)</td></tr>
+    <tr><td>稳定性</td><td>稳定</td></tr>
+  </table>
+
+  <h2>4. 伪代码</h2>
+  <pre>
+Algorithm X(A[0..n-1])
+  // ...
+  </pre>
+</div>
+
+<script>
+// ============ 在这里实现你的算法可视化 ============
+// 框架已就绪：canvas、controls、stats、step log
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let data = [];       // 当前数组
+let frames = [];     // 所有动画帧
+let currentFrame = 0;
+let playing = false;
+let timer = null;
+let speed = 5;
+
+function resize() {
+  const w = canvas.parentElement.clientWidth - 40;
+  canvas.width = w * (window.devicePixelRatio || 1);
+  canvas.height = 350 * (window.devicePixelRatio || 1);
+  canvas.style.width = w + 'px';
+  canvas.style.height = '350px';
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+function randomize() {
+  pause();
+  data = Array.from({length: 10}, () => Math.floor(Math.random() * 90) + 10);
+  frames = [];
+  currentFrame = 0;
+  document.getElementById('stat-size').textContent = data.length;
+  document.getElementById('stat-compare').textContent = '0';
+  document.getElementById('stat-swap').textContent = '0';
+  document.getElementById('stepCounter').textContent = '0/0';
+  document.getElementById('stepLog').innerHTML = '<div class="line" style="color:var(--text2);">已随机生成新数组</div>';
+  resize();
+}
+
+function draw() {
+  // 绘制当前的 data
+  const W = canvas.width / (window.devicePixelRatio || 1);
+  const H = canvas.height / (window.devicePixelRatio || 1);
+  ctx.clearRect(0, 0, W, H);
+  if (!data.length) return;
+  const barW = (W - 40) / data.length - 4;
+  const maxVal = Math.max(...data);
+  data.forEach((v, i) => {
+    const x = 20 + i * (barW + 4);
+    const h = (v / maxVal) * (H - 60);
+    const y = H - 30 - h;
+    ctx.fillStyle = '#0366d6';
+    ctx.fillRect(x, y, barW, h);
+    ctx.fillStyle = '#24292e';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(v, x + barW/2, H - 12);
+  });
+}
+
+function play() {
+  if (playing) return;
+  if (frames.length === 0) generateFrames();
+  playing = true;
+  runAnimation();
+}
+function pause() { playing = false; clearTimeout(timer); }
+function step() {
+  pause();
+  if (frames.length === 0) generateFrames();
+  if (currentFrame < frames.length - 1) { currentFrame++; applyFrame(); }
+}
+function reset() {
+  pause();
+  if (frames.length > 0) { currentFrame = 0; applyFrame(); }
+}
+function updateSpeed() {
+  speed = parseInt(document.getElementById('speed').value);
+}
+
+function generateFrames() {
+  // 子类重写此方法
+  frames = [{ array: [...data], highlights: [], info: '初始数组' }];
+}
+
+function runAnimation() {
+  if (!playing) return;
+  if (currentFrame >= frames.length - 1) { playing = false; return; }
+  currentFrame++;
+  applyFrame();
+  const delay = 1100 - speed * 100; // speed 1-10 → 1000ms-100ms
+  timer = setTimeout(runAnimation, delay);
+}
+
+function applyFrame() {
+  const f = frames[currentFrame];
+  data = [...f.array];
+  document.getElementById('stepCounter').textContent = `${currentFrame+1}/${frames.length}`;
+  if (f.info) {
+    const log = document.getElementById('stepLog');
+    log.innerHTML = (f.info + '\n' + log.innerHTML.split('\n').slice(0, 19).join('\n'))
+      .split('\n').filter(l => l.trim()).slice(0, 20)
+      .map(l => `<div class="line">${l}</div>`).join('');
+  }
+  draw();
+}
+
+// 初始化
+randomize();
+</script>
+</body>
+</html>
